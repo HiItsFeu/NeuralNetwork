@@ -1,0 +1,71 @@
+Deep learning auto pilot -> But : faire le meilleur temps sur un circuit
+
+- Apprend de 0 un circuit -> les courbes, les virages, quand mettre les gaz, quand mettre les freins, l'angle du volant
+
+IMPORTANT: Fréquence de décision: ne pas le faire par frame, le faire toute les 0,05, Learning Rate -> 0.0003 -> logique PPO
+
+1/ L'observation (les inputs)
+- Raycast pointant vers l'extérieur du circuit
+- Vitesse vers l'avant
+- Vitesse latérale/dérapage -> slip angle
+- Vitesse angulaire -> Yaw Rate
+- Action précédente Angle du volant (t-1)
+- Action précédente Accélérateur
+- Action précédente Frein
+
+2/Le champ d'action: -> algorithme: PPO
+- Direction (steering)
+- Les pédales (accélération, freinage)
+
+3/Les Récompenses: -> but: l'ia doit avoir le plus haut score, l'ajout de score dépend de l'importance de l'action réalisée
+- 2 catégories:
+
+Positif: (++ score)
+- Progression sur la piste -> total distance - current distance / 100 -> x% à faire
+- Bonus de vitesse - moyenne kmh sur un tour -> distance (longueur de la spline -> km) / temps (chrono -> h)
+- Fin de tour -> total distance - current distance == 0
+
+Négatif: (-- score)
+- Sortie de piste & collisions
+- Pénalité de temps
+- Pénalité d'à-coups
+- Pénalité d'immobilisation
+
+Systèmes de debug:
+- Prévoir un bouton de repositionnement in-game si la voiture est glicthé et une variable de time scale pour accélérer le processus, changer de caméra
+- Si hors piste ou collisions -> reset du tour -> pénalité de score
+- IMPORTANT: bloquer la marche arrière
+
+- 2 Caméras: embarqués (POV derrière la voiture) et un plan d'ensemble
+
+Logique du neural network:
+
+- Input layer: (nombre d'entrée par élément -> toutes normalisées entre -1 & 1)
+une entrée par élément:
+- raycast
+- Volant -> Tanh
+- Accélérateur -> Sigmoïde
+- Freinage -> Sigmoïde
+
+- Hidden layer 1: (128 neurones) (logique d'architecture symétrique)
+
+
+- Hidden layer 2: (128 neurones)
+
+
+- Output layer: (3 sortie -> chaque sortie reçois 128 réponses -> fonction de tri entre -1 & 1 pour définir la meilleure réponse)
+1 pour le volant, 1 pour l'accélérateur et 1 pour le freinage
+
+- Efficacité du réseau de neurones = nombre de layer -> impact sur la vitesse d'exécution du réseau
+	- Layer 1 -> Input, donnés brutes envoyées
+	- Layer 2 -> reçois inputs, calcul poids, somme avec biais, fonction activation, Tanh
+	- Layer 3 -> refait les mêmes étapes que Layer 2 avec le résultat du layer 2
+	- Layer n... -> etc...
+	- Layer n + 1 -> mêmes étapes pour transformer en 2 sorties -> volant et accel/frein
+
+Connection:
+- Poids
+- Biais
+- Fonction d'activation -> Fonction Sigmoïde (taille entre 0 et 1) ou passer par Tanh pour une taille entre -1 & 1 -> plus souple pour du véhicule
+- Fonction de coût
+- Backpropagation
