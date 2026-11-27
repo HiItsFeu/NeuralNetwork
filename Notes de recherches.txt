@@ -27,6 +27,7 @@ Positif: (++ score)
 
 Négatif: (-- score)
 - Sortie de piste & collisions -> GetDistanceWithSpline -> si > 600, sortie
+- Checkpoints pas passer dans l'ordre
 - Pénalité d'à-coups
 - Pénalité d'immobilisation
 
@@ -69,3 +70,21 @@ Connection:
 - Fonction d'activation -> Fonction Sigmoïde (taille entre 0 et 1) ou passer par Tanh pour une taille entre -1 & 1 -> plus souple pour du véhicule
 - Fonction de coût
 - Backpropagation
+
+Architecture:
+- Véhicule = pawn
+- Calcul des raycasts
+- Neural network
+- TrackArbitre
+
+
+/Neural Network:
+- Calcul matriciels lourds -> c++
+- Gestion du PPO -> c++
+- Gestion du tableau de neurones -> c++
+
+Systèmes de checkpoints
+- Reprendre les keys de la spline TrackArbiter
+- Comparer pour chaque voiture sa clé actuelle selon la spline et la prochaine (par rapport à la world pos de la voiture et world pos de la spline) (sauf si dernière key -> première key)
+	- Si la différence d'index > à 1, is alive = false, throttle = 0, brake = 1
+- Ligne d'arrivée -> actor avec une collision box invisi., valide le tour de la voiture qui traverse. (Check la current key pos et vérifie si == à l'avant dernière de la spline)
